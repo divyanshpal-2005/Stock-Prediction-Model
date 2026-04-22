@@ -17,7 +17,7 @@ app.add_middleware(
 
 @app.get("/predict/{stock}")
 def predict(stock: str):
-    data = yf.download(stock, start="2023-01-01", end="2024-01-01")
+    data = yf.download(stock, start="2023-01-01", end="2026-04-01")
 
     if data.empty:
         return {"error": "Invalid stock symbol"}

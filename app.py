@@ -22,7 +22,7 @@ def predict(stock: str):
     if data.empty:
         return {"error": "Invalid stock symbol"}
 
-    # ✅ FIX MULTI-INDEX ISSUE
+    
     if isinstance(data.columns, pd.MultiIndex):
         data.columns = data.columns.get_level_values(0)
 

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Stock Dashboard</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            padding: 40px;
+        }
+
+        input {
+            padding: 10px;
+            width: 200px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #22c55e;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .card {
+            margin-top: 20px;
+            padding: 20px;
+            background: #1e293b;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        canvas {
+            margin-top: 30px;
+            background: #111827;
+            border-radius: 10px;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>📈 AI Trading Dashboard</h1>
+
+<input type="text" id="stock" placeholder="Enter stock (AAPL)">
+<button onclick="predict()">Predict</button>
+
+<div class="card">
+    <h2 id="result">Enter stock to see prediction</h2>
+</div>
+
+<canvas id="chart" width="600" height="300"></canvas>
+
+<script>
+let chart;
+
+async function predict() {
+    const stock = document.getElementById("stock").value;
+
+    if (!stock) {
+        alert("Enter stock symbol");
+        return;
+    }
+
+    document.getElementById("result").innerText = "Loading...";
+
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/predict/${stock}`);
+        const data = await res.json();
+
+        if (data.error) {
+            document.getElementById("result").innerText = data.error;
+            return;
+        }
+
+        document.getElementById("result").innerText =
+            `Stock: ${data.stock}
+Current: $${data.current_price.toFixed(2)}
+Predicted: $${data.predicted_price.toFixed(2)}
+Signal: ${data.signal}`;
+
+        // 📊 DRAW GRAPH
+        const ctx = document.getElementById("chart").getContext("2d");
+
+        if (chart) chart.destroy();
+
+        chart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: data.prices.map((_, i) => i + 1),
+                datasets: [{
+                    label: "Last 30 Days Price",
+                    data: data.prices,
+                    borderColor: "lime",
+                    fill: false,
+                    tension: 0.3
+                }]
+            }
+        });
+
+    } catch (err) {
+        document.getElementById("result").innerText = "Server error";
+    }
+}
+</script>
+
+</body>
+</html>
